@@ -1,0 +1,64 @@
+esphome:
+  # Required ESPhome minimum version for compatibility
+  name: esphome-bm2-ble
+  friendly_name: ESPHome BM2 BLE
+  # This project is built for ESPhome 2025.11 (or newer) and uses the ESP-IDF framework
+  min_version: 2025.11.0
+  name_add_mac_suffix: false
+
+esp32:
+  board: lolin_s3_pro
+  framework:
+    type: esp-idf
+    sdkconfig_options:
+      # Enable hardware AES acceleration
+      CONFIG_MBEDTLS_HARDWARE_AES: y
+      CONFIG_MBEDTLS_AES_USE_INTERRUPT: y
+    
+external_components:
+  - source: github://andrewbackway/esphome-bm6_ble@main
+
+wifi:
+  ssid: "YOUR_SSID"
+  password: "YOUR_PASS"
+
+logger:
+  level: DEBUG
+
+esp32_ble_tracker:
+
+ble_client:
+  - mac_address: "XX:XX:XX:XX:XX:XX"
+    id: bm6_ble_client
+
+bm6_ble:
+  id: bm6_1
+  ble_client_id: bm6_ble_client
+
+sensor:
+  - platform: bm6_ble
+    bm6_ble_id: bm6_1
+    type: VOLTAGE
+    name: "Battery Voltage"
+  - platform: bm6_ble
+    bm6_ble_id: bm6_1
+    type: TEMPERATURE
+    name: "Battery Temperature"
+  - platform: bm6_ble
+    bm6_ble_id: bm6_1
+    type: BATTERY_LEVEL
+    name: "Battery SoC"
+
+binary_sensor:
+  - platform: bm6_ble
+    bm6_ble_id: bm6_1
+    type: LOW_VOLTAGE
+    name: "Low Voltage Alert"
+  - platform: bm6_ble
+    bm6_ble_id: bm6_1
+    type: WEAK_BATTERY
+    name: "Weak Battery Alert"
+  - platform: bm6_ble
+    bm6_ble_id: bm6_1
+    type: CHARGING
+    name: "Battery Charging"
