@@ -14,7 +14,8 @@ CONFIG_SCHEMA = cv.Schema({
 }).extend(ble_client.BLE_CLIENT_SCHEMA).extend(cv.COMPONENT_SCHEMA)
 
 async def to_code(config):
-    # This creates the pointer: bm6_ble::BM6Hub *bm6_1 = new bm6_ble::BM6Hub();
-    var = cg.new_PVar(config[CONF_ID], BM6Hub.new())
+    # This creates the C++ pointer: bm6_ble::BM6Hub *bm6_1 = new bm6_ble::BM6Hub();
+    var = cg.new_variable(config[CONF_ID], BM6Hub.new())
+    # register_component and register_ble_node MUST be awaited in 2026.2.x
     await cg.register_component(var, config)
     await ble_client.register_ble_node(var, config)
