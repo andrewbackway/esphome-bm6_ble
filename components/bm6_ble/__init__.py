@@ -17,6 +17,7 @@ CONFIG_SCHEMA = cv.Schema({
 }).extend(cv.COMPONENT_SCHEMA)
 
 async def to_code(config):
+    print("DEBUG: Generating code for BM6Hub") # This will show in your terminal during compile
     var = cg.new_Pvariable(config[CONF_ID])
     await cg.register_component(var, config)
     ble = await cg.get_variable(config["ble_client_id"])
