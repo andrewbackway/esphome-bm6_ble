@@ -8,7 +8,7 @@ namespace bm6_ble {
 static const char *const TAG = "bm6_ble";
 // Correct AES key
 static const uint8_t AUTH_KEY[16] = {0x69, 0x7e, 0xa0, 0xb5, 0xd5, 0x4c, 0xf0, 0x24, 0xe7, 0x94, 0x77, 0x23, 0x55, 0x55, 0x41, 0x14};
-//static const uint8_t AES_KEY[16] = {108, 101, 97, 103, 101, 110, 100, 255, 254, 48, 49, 48, 48, 48, 48, 57};
+/static const uint8_t AES_KEY[16] = {108, 101, 97, 103, 101, 110, 100, 255, 254, 48, 49, 48, 48, 48, 48, 57};
 // Command to start notifications (plain, before encrypt)
 static const uint8_t START_CMD[16] = {0xd1, 0x55, 0x07, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 
@@ -97,19 +97,41 @@ void BM6Hub::gattc_event_handler(esp_gattc_cb_event_t event, esp_gatt_if_t gattc
             break;
 
         case ESP_GATTC_NOTIFY_EVT:
-            ESP_LOGI(TAG, "Notification RX! len=%d", param->notify.value_len);
-            if (param->notify.handle == this->char_handle_notify_) {
-                if (param->notify.value_len < 6) return;
+            if (param->notify.handle == this->char_handle_notify_ && param->notify.value_len == 16) {
+                ESP_LOGI(TAG, "Encrypted notification received (len=16)");
 
-                // Your original plain parsing (test if sane now)
-                float volt = (uint16_t)(param->notify.value[2] << 8 | param->notify.value[1]) / 100.0f;
-                float temp = (int8_t)param->notify.value[3];
-                float level = param->notify.value[5];
+                uint8_t decrypted[16] = {0};
+                uint8_t iv[16] = {0};  // zero IV
 
-                bool low_v = (param->notify.value[4] & 0x01);
-                bool weak_b = (param->notify.value[4] & 0x02);
-                bool charging = (param->notify.value[4] & 0x04);
+                mbedtls_aes_context aes;
+                mbedtls_aes_init(&aes);
+                mbedtls_aes_setkey_dec(&aes, AES_KEY, 128);
+                mbedtls_aes_crypt_cbc(&aes, MBEDTLS_AES_DECRYPT, 16, iv, param->notify.value, decrypted);
+                mbedtls_aes_free(&aes);
 
+                // Log raw decrypted for debug (hex)
+                char hex_buf[50];
+                format_hex_pretty(decrypted, 16, hex_buf, sizeof(hex_buf));
+                ESP_LOGD(TAG, "Decrypted: %s", hex_buf);
+
+                // Check prefix (common sanity check)
+                if (decrypted[0] != 0xd1 || decrypted[1] != 0x55 || decrypted[2] != 0x07) {
+                    ESP_LOGW(TAG, "Invalid decrypted prefix - wrong key or variant?");
+                    return;
+                }
+
+                // Parse (from tarball.ca + Goodwillson/NorbertRoller code)
+                float volt = ((decrypted[8] << 8) | decrypted[7]) / 100.0f;
+                int8_t temp_sign = (decrypted[3] == 0x01) ? -1 : 1;
+                float temp = temp_sign * decrypted[4];
+                float level = decrypted[6];  // SoC %
+
+                uint8_t flags = decrypted[5];
+                bool low_v = (flags & 0x01);
+                bool weak_b = (flags & 0x02);
+                bool charging = (flags & 0x04);
+
+                // Publish
                 if (this->voltage_sensor_) this->voltage_sensor_->publish_state(volt);
                 if (this->temperature_sensor_) this->temperature_sensor_->publish_state(temp);
                 if (this->level_sensor_) this->level_sensor_->publish_state(level);
@@ -118,7 +140,7 @@ void BM6Hub::gattc_event_handler(esp_gattc_cb_event_t event, esp_gatt_if_t gattc
                 if (this->weak_battery_binary_) this->weak_battery_binary_->publish_state(weak_b);
                 if (this->charging_binary_) this->charging_binary_->publish_state(charging);
 
-                ESP_LOGD(TAG, "Plain parse: V=%.2f, T=%.0f, SoC=%.0f, flags=0x%02x", volt, temp, level, param->notify.value[4]);
+                ESP_LOGD(TAG, "Parsed: Voltage=%.2f V, Temp=%.1f °C, SoC=%.0f%%, Flags=0x%02X", volt, temp, level, flags);
             }
             break;
 
