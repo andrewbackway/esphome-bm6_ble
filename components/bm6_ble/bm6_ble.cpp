@@ -38,11 +38,14 @@ void BM6Hub::loop() {
             this->char_handle_write_ = chr_w->handle;
             this->char_handle_notify_ = chr_n->handle;
 
+            ESP_LOGD(TAG, "Found BM6 service and characteristics - initiating handshake");
+
             // Step 1: Auth
             esp_ble_gattc_write_char(this->parent()->get_gattc_if(), this->parent()->get_conn_id(),
                                     this->char_handle_write_, 16, (uint8_t *)AUTH_KEY,
                                     ESP_GATT_WRITE_TYPE_RSP, ESP_GATT_AUTH_REQ_NONE);
 
+            ESP_LOGD(TAG, "Auth key sent, waiting for response before subscribing to notifications");
             // Step 2: Notify
             esp_ble_gattc_register_for_notify(this->parent()->get_gattc_if(), this->parent()->get_remote_bda(),
                                              this->char_handle_notify_);
@@ -59,27 +62,36 @@ void BM6Hub::gattc_event_handler(esp_gattc_cb_event_t event, esp_gatt_if_t gattc
         ESP_LOGD(TAG, "Disconnected - resetting subscription flag");
         return;
     }
-  if (event == ESP_GATTC_NOTIFY_EVT && param->notify.handle == this->char_handle_notify_) {
-    // Protocol parsing for BM6 (Non-encrypted bytes)
-    if (param->notify.value_len < 6) return;
-
-    float volt = (uint16_t)(param->notify.value[2] << 8 | param->notify.value[1]) / 100.0f;
-    float temp = (int8_t)param->notify.value[3];
-    float level = param->notify.value[5]; // SoC
+    if ( event == SP_GATTC_OPEN_EVT ) {
+        if (param->open.status == ESP_GATT_OK) {
+            ESP_LOGI(TAG, "Connection opened successfully!");
+            // Start discovery here if needed
+        } else {
+            ESP_LOGE(TAG, "Connection failed, status=%d", param->open.status);
+        }
+    }
     
-    // Status Flags
-    bool low_v = (param->notify.value[4] & 0x01);
-    bool weak_b = (param->notify.value[4] & 0x02);
-    bool charging = (param->notify.value[4] & 0x04);
+    if (event == ESP_GATTC_NOTIFY_EVT && param->notify.handle == this->char_handle_notify_) {
+        // Protocol parsing for BM6 (Non-encrypted bytes)
+        if (param->notify.value_len < 6) return;
 
-    if (this->voltage_sensor_) this->voltage_sensor_->publish_state(volt);
-    if (this->temperature_sensor_) this->temperature_sensor_->publish_state(temp);
-    if (this->level_sensor_) this->level_sensor_->publish_state(level);
-    
-    if (this->low_volt_binary_) this->low_volt_binary_->publish_state(low_v);
-    if (this->weak_battery_binary_) this->weak_battery_binary_->publish_state(weak_b);
-    if (this->charging_binary_) this->charging_binary_->publish_state(charging);
-  }
+        float volt = (uint16_t)(param->notify.value[2] << 8 | param->notify.value[1]) / 100.0f;
+        float temp = (int8_t)param->notify.value[3];
+        float level = param->notify.value[5]; // SoC
+        
+        // Status Flags
+        bool low_v = (param->notify.value[4] & 0x01);
+        bool weak_b = (param->notify.value[4] & 0x02);
+        bool charging = (param->notify.value[4] & 0x04);
+
+        if (this->voltage_sensor_) this->voltage_sensor_->publish_state(volt);
+        if (this->temperature_sensor_) this->temperature_sensor_->publish_state(temp);
+        if (this->level_sensor_) this->level_sensor_->publish_state(level);
+        
+        if (this->low_volt_binary_) this->low_volt_binary_->publish_state(low_v);
+        if (this->weak_battery_binary_) this->weak_battery_binary_->publish_state(weak_b);
+        if (this->charging_binary_) this->charging_binary_->publish_state(charging);
+    }
 }
 
 } // namespace bm6_ble
