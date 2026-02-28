@@ -5,8 +5,23 @@ namespace esphome {
 namespace bm6_ble {
 
 static const char *const TAG = "bm6_ble";
+
 // The specific BM6 Auth Key
 static const uint8_t AUTH_KEY[16] = {0x69, 0x7e, 0xa0, 0xb5, 0xd5, 0x4c, 0xf0, 0x24, 0xe7, 0x94, 0x77, 0x23, 0x55, 0x55, 0x41, 0x14};
+
+BM6Hub::BM6Hub() {
+    ESP_LOGI(TAG, "BM6Hub constructor called - object instantiated!");
+}
+
+void BM6Hub::dump_config() {
+    ESP_LOGCONFIG(TAG, "BM6 BLE Hub:");
+    if (this->parent_) {
+        ESP_LOGCONFIG(TAG, "  BLE Client ID: present");
+    } else {
+        ESP_LOGCONFIG(TAG, "  BLE Client: MISSING!");
+    }
+    ESP_LOGCONFIG(TAG, "  State: %s", this->state_str().c_str());  // or similar
+}
 
 void BM6Hub::setup() {
     ESP_LOGI(TAG, "BM6 Hub Setup Initialized");

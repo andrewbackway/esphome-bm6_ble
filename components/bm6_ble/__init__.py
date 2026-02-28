@@ -22,3 +22,4 @@ async def to_code(config):
     await cg.register_component(var, config)
     ble = await cg.get_variable(config["ble_client_id"])
     cg.add(ble.register_ble_node(var))
+    print("DEBUG: BM6Hub registered with BLE node")
