@@ -14,6 +14,7 @@ CONFIG_SCHEMA = cv.Schema({
 }).extend(ble_client.BLE_CLIENT_SCHEMA).extend(cv.COMPONENT_SCHEMA)
 
 async def to_code(config):
-    var = cg.new_PVar(config[CONF_ID])
+    # Use new_variable instead of new_PVar
+    var = cg.new_variable(config[CONF_ID])
     await cg.register_component(var, config)
     await ble_client.register_ble_node(var, config)

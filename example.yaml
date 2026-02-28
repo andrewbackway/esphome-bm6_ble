@@ -10,10 +10,6 @@ esp32:
   board: lolin_s3_pro
   framework:
     type: esp-idf
-    sdkconfig_options:
-      # Enable hardware AES acceleration
-      CONFIG_MBEDTLS_HARDWARE_AES: y
-      CONFIG_MBEDTLS_AES_USE_INTERRUPT: y
     
 external_components:
   - source: github://andrewbackway/esphome-bm6_ble@main

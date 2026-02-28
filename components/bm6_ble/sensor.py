@@ -41,6 +41,7 @@ CONFIG_SCHEMA = cv.Schema({
 
 async def to_code(config):
     hub = await cg.get_variable(config[CONF_BM6_BLE_ID])
+    # await the sensor creation
     sens = await sensor.new_sensor(config)
     
     if config[CONF_TYPE] == "VOLTAGE":
