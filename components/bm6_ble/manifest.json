@@ -1,5 +1,5 @@
 {
-  "name": "bm2_ble",
+  "name": "bm6_ble",
   "codeowners": ["@andrewbackway"],
   "dependencies": ["esp32_ble_tracker", "ble_client"],
   "iot_class": "local_polling"
