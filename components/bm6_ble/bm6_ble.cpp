@@ -89,7 +89,7 @@ void BM6Hub::gattc_event_handler(esp_gattc_cb_event_t event, esp_gatt_if_t gattc
             }
             break;
 
-        case ESP_GATTC_WRITE_EVT:
+        case ESP_GATTC_WRITE_CHAR_EVT:
             ESP_LOGD(TAG, "Write response for handle 0x%04x, status=0x%02x", param->write.handle, param->write.status);
             if (param->write.status != ESP_GATT_OK) {
                 ESP_LOGE(TAG, "Write FAILED - check if auth rejected");
