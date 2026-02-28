@@ -1,6 +1,6 @@
 #include "bm6_ble.h"
 #include "esphome/core/log.h"
-#include "esp_aes.h"  // For AES decryption
+#include <aes/esp_aes.h>
 
 namespace esphome {
 namespace bm6_ble {
