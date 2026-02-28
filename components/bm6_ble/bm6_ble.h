@@ -9,6 +9,8 @@ namespace bm6_ble {
 
 class BM6Hub : public Component, public ble_client::BLEClientNode {
  public:
+  void setup() override;
+  void loop() override;
   void gattc_event_handler(esp_gattc_cb_event_t event, esp_gatt_if_t gattc_if, esp_ble_gattc_cb_param_t *param) override;
 
   void set_voltage_sensor(sensor::Sensor *s) { voltage_sensor_ = s; }
@@ -30,6 +32,9 @@ class BM6Hub : public Component, public ble_client::BLEClientNode {
   
   uint16_t char_handle_write_{0};
   uint16_t char_handle_notify_{0};
+  
+  // New state tracking to prevent race conditions on the S3
+  bool subscribed_{false};
 };
 
 } // namespace bm6_ble
