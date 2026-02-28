@@ -20,7 +20,6 @@ void BM6Hub::dump_config() {
     } else {
         ESP_LOGCONFIG(TAG, "  BLE Client: MISSING!");
     }
-    ESP_LOGCONFIG(TAG, "  State: %s", this->state_str().c_str());  // or similar
 }
 
 void BM6Hub::setup() {

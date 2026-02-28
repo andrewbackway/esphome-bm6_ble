@@ -23,6 +23,8 @@ class BM6Hub : public Component, public ble_client::BLEClientNode {
   void set_weak_battery_binary(binary_sensor::BinarySensor *s) { weak_battery_binary_ = s; }
   void set_charging_binary(binary_sensor::BinarySensor *s) { charging_binary_ = s; }
 
+  float get_setup_priority() const override { return setup_priority::DATA; }
+
  protected:
   sensor::Sensor *voltage_sensor_{nullptr};
   sensor::Sensor *temperature_sensor_{nullptr};
