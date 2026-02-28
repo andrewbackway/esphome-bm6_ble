@@ -62,7 +62,7 @@ void BM6Hub::gattc_event_handler(esp_gattc_cb_event_t event, esp_gatt_if_t gattc
         ESP_LOGD(TAG, "Disconnected - resetting subscription flag");
         return;
     }
-    if ( event == SP_GATTC_OPEN_EVT ) {
+    if ( event == ESP_GATTC_OPEN_EVT ) {
         if (param->open.status == ESP_GATT_OK) {
             ESP_LOGI(TAG, "Connection opened successfully!");
             // Start discovery here if needed
@@ -70,7 +70,7 @@ void BM6Hub::gattc_event_handler(esp_gattc_cb_event_t event, esp_gatt_if_t gattc
             ESP_LOGE(TAG, "Connection failed, status=%d", param->open.status);
         }
     }
-    
+
     if (event == ESP_GATTC_NOTIFY_EVT && param->notify.handle == this->char_handle_notify_) {
         // Protocol parsing for BM6 (Non-encrypted bytes)
         if (param->notify.value_len < 6) return;
