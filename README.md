@@ -1,4 +1,4 @@
-# esphome-bm6_ble
+# ESPHome Battery Monitor BM6 Integration
 
 ESPHome external component for the **BM6 Battery Monitor** (and compatible BM200 models) using BLE communication. Optimized for **ESP32-S3** and the **ESP-IDF** framework.
 
