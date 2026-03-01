@@ -2,8 +2,6 @@
 
 ESPHome external component for the **BM6 Battery Monitor** (and compatible BM200 models) using BLE communication. Optimized for **ESP32-S3** and the **ESP-IDF** framework.
 
-This component follows a **Type-based entity pattern** (similar to Dometic CFX components), allowing you to define individual sensors for voltage, temperature, and status alerts within a single hub.
-
 ## Features
 
 - **Voltage Monitoring**: Real-time battery voltage ($0.01V$ precision).
