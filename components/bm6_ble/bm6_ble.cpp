@@ -144,13 +144,14 @@ void BM6Hub::gattc_event_handler(esp_gattc_cb_event_t event, esp_gatt_if_t gattc
         if (this->temperature_sensor_) this->temperature_sensor_->publish_state(temp);
         if (this->level_sensor_)       this->level_sensor_->publish_state(level);
 
-        // Binary sensor flags from d[5] — byte position unverified, to be confirmed later
-        bool low_v    = (d[5] & 0x01);
-        bool weak_b   = (d[5] & 0x02);
-        bool charging = (d[5] & 0x04);
+        // d[5] is a 3-value enum from the BM6 device (confirmed via Rafciq/BM6 reverse engineering):
+        //   0 = Battery OK
+        //   1 = Low Voltage
+        //   2 = Charging
+        bool low_v    = (d[5] == 0x01);
+        bool charging = (d[5] == 0x02);
 
         if (this->low_volt_binary_)     this->low_volt_binary_->publish_state(low_v);
-        if (this->weak_battery_binary_) this->weak_battery_binary_->publish_state(weak_b);
         if (this->charging_binary_)     this->charging_binary_->publish_state(charging);
     }
 }

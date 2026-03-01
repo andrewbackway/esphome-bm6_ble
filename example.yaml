@@ -52,9 +52,5 @@ binary_sensor:
     name: "Low Voltage Alert"
   - platform: bm6_ble
     bm6_ble_id: bm6_1
-    type: WEAK_BATTERY
-    name: "Weak Battery Alert"
-  - platform: bm6_ble
-    bm6_ble_id: bm6_1
     type: CHARGING
     name: "Battery Charging"

@@ -11,10 +11,6 @@ TYPES = {
         device_class=DEVICE_CLASS_PROBLEM,
         icon="mdi:battery-alert",
     ),
-    "WEAK_BATTERY": binary_sensor.binary_sensor_schema(
-        device_class=DEVICE_CLASS_PROBLEM,
-        icon="mdi:battery-minus",
-    ),
     "CHARGING": binary_sensor.binary_sensor_schema(
         device_class=DEVICE_CLASS_BATTERY_CHARGING,
         icon="mdi:battery-charging",
@@ -32,7 +28,5 @@ async def to_code(config):
     
     if config[CONF_TYPE] == "LOW_VOLTAGE":
         cg.add(hub.set_low_voltage_binary(sens))
-    elif config[CONF_TYPE] == "WEAK_BATTERY":
-        cg.add(hub.set_weak_battery_binary(sens))
     elif config[CONF_TYPE] == "CHARGING":
         cg.add(hub.set_charging_binary(sens))

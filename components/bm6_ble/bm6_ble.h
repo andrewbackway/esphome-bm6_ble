@@ -21,7 +21,6 @@ class BM6Hub : public Component, public ble_client::BLEClientNode {
   void set_level_sensor(sensor::Sensor *s) { level_sensor_ = s; }
   
   void set_low_voltage_binary(binary_sensor::BinarySensor *s) { low_volt_binary_ = s; }
-  void set_weak_battery_binary(binary_sensor::BinarySensor *s) { weak_battery_binary_ = s; }
   void set_charging_binary(binary_sensor::BinarySensor *s) { charging_binary_ = s; }
 
   float get_setup_priority() const override { return setup_priority::DATA; }
@@ -32,7 +31,6 @@ class BM6Hub : public Component, public ble_client::BLEClientNode {
   sensor::Sensor *level_sensor_{nullptr};
   
   binary_sensor::BinarySensor *low_volt_binary_{nullptr};
-  binary_sensor::BinarySensor *weak_battery_binary_{nullptr};
   binary_sensor::BinarySensor *charging_binary_{nullptr};
   
   uint16_t char_handle_write_{0};

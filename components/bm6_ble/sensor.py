@@ -4,19 +4,22 @@ from esphome.components import sensor
 from esphome.const import (
     CONF_TYPE, UNIT_VOLT, UNIT_CELSIUS, UNIT_PERCENT,
     DEVICE_CLASS_VOLTAGE, DEVICE_CLASS_TEMPERATURE, DEVICE_CLASS_BATTERY,
-    STATE_CLASS_MEASUREMENT, CONF_ICON
+    STATE_CLASS_MEASUREMENT,
 )
 from . import bm6_ble_ns, BM6Hub
 
 CONF_BM6_BLE_ID = "bm6_ble_id"
 
+# Each type carries its own fixed unit, device class, icon and precision.
+# cv.typed_schema selects the matching schema by CONF_TYPE, so none of
+# these need to be specified in the YAML — they are applied automatically.
 TYPES = {
     "VOLTAGE": sensor.sensor_schema(
         unit_of_measurement=UNIT_VOLT,
         device_class=DEVICE_CLASS_VOLTAGE,
         state_class=STATE_CLASS_MEASUREMENT,
         accuracy_decimals=2,
-        icon="mdi:flash",
+        icon="mdi:car-battery",
     ),
     "TEMPERATURE": sensor.sensor_schema(
         unit_of_measurement=UNIT_CELSIUS,
@@ -34,16 +37,16 @@ TYPES = {
     ),
 }
 
-CONFIG_SCHEMA = cv.Schema({
+# typed_schema picks the correct TYPES entry based on the `type:` key, so the
+# unit/icon/device_class defaults are enforced without any YAML configuration.
+CONFIG_SCHEMA = cv.typed_schema(TYPES, key=CONF_TYPE, upper=True).extend({
     cv.GenerateID(CONF_BM6_BLE_ID): cv.use_id(BM6Hub),
-    cv.Required(CONF_TYPE): cv.enum(TYPES, upper=True),
-}).extend(sensor.sensor_schema())
+})
 
 async def to_code(config):
     hub = await cg.get_variable(config[CONF_BM6_BLE_ID])
-    # Create and register the sensor entity
     sens = await sensor.new_sensor(config)
-    
+
     if config[CONF_TYPE] == "VOLTAGE":
         cg.add(hub.set_voltage_sensor(sens))
     elif config[CONF_TYPE] == "TEMPERATURE":
