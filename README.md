@@ -9,7 +9,7 @@ This component follows a **Type-based entity pattern** (similar to Dometic CFX c
 - **Voltage Monitoring**: Real-time battery voltage ($0.01V$ precision).
 - **Temperature Sensing**: Internal battery temperature reporting in °C.
 - **Battery Percentage (SoC)**: State of Charge calculation ($0-100\%$).
-- **Status Indicators**: Binary sensors for **Charging**, **Low Voltage**, and **Weak Battery**.
+- **Status Indicators**: Binary sensors for **Charging**, and **Low Voltage**
 - **NimBLE Support**: Uses the memory-efficient NimBLE stack for better performance on the S3.
 
 ## Board & ESPHome Version
@@ -51,11 +51,11 @@ esp32_ble_tracker:
 
 ble_client:
   - mac_address: "AA:BB:CC:DD:EE:FF" # Replace with your BM6 MAC
-    id: mux_battery_ble
+    id: bm6_ble
 
 bm6_ble:
-  id: bm6_hub
-  ble_client_id: mux_battery_ble
+  id: bm6_1
+  ble_client_id: bm6_ble
 
 ```
 
@@ -76,15 +76,19 @@ YAML
 ```
 sensor:
   - platform: bm6_ble
-    bm6_ble_id: bm6_hub
+    bm6_ble_id: bm6_1
     type: VOLTAGE
-    name: "Aux Battery Voltage"
+    name: "Battery Voltage"
 
   - platform: bm6_ble
-    bm6_ble_id: bm6_hub
+    bm6_ble_id: bm6_1
     type: BATTERY_LEVEL
-    name: "Aux Battery SoC"
+    name: "Battery SoC"
 
+  - platform: bm6_ble
+    bm6_ble_id: bm6_1
+    type: BATTERY_LEVEL
+    name: "Battery SoC"
 ```
 
 #### Binary Sensors (`binary_sensor`)
@@ -93,7 +97,6 @@ sensor:
 | --- | --- | --- |
 | `CHARGING` | Battery is charging | `battery_charging` |
 | `LOW_VOLTAGE` | Voltage below threshold | `problem` |
-| `WEAK_BATTERY` | Cranking/Health alert | `problem` |
 
 YAML
 
@@ -102,14 +105,14 @@ binary_sensor:
   - platform: bm6_ble
     bm6_ble_id: bm6_hub
     type: CHARGING
-    name: "Aux Battery Charging"
+    name: "Battery Charging"
+
+  - platform: bm6_ble
+    bm6_ble_id: bm6_1
+    type: LOW_VOLTAGE
+    name: "Low Voltage Alert"
 
 ```
-
-Protocol Details
-----------------
-
-The BM6 requires a 16-byte authentication key written to handle `0xFFF3` to enable notifications on handle `0xFFF4`. This component handles the handshake automatically upon connection.
 
 License
 -------
